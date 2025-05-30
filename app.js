@@ -5,12 +5,35 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userModel = require('./models/user');
 const postModel = require('./models/post');
+
+const  upload = require('./utils/multer');
+const path = require('path');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
+
+
+
+
+
+
 app.get('/', (req, res) => {
   res.render('index');
+})
+
+app.get('/profile/upload', (req, res) => {
+  res.render('profileupload');
+  
+})
+
+app.post('/upload', isLoggedIn ,upload.single('image'), async (req, res) => {
+ let user = await  userModel.findOne({email : req.user.email})
+ user.profilepic = req.file.filename;
+ await user.save();
+ res.redirect('/profile');
+  
 })
 
 app.get('/login', (req, res) => {
